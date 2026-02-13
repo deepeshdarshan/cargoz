@@ -218,6 +218,7 @@
             <option value="capacity-desc">Capacity - High to Low</option>
             <option value="capacity-asc">Capacity - Low to High</option>
             <option value="name-asc">Name - A to Z</option>
+            <option value="name-desc">Name - Z to A</option>
           </select>
         </div>
       </div>
@@ -336,6 +337,8 @@
         sorted.sort((a, b) => (parseFloat(a.capacity) || 0) - (parseFloat(b.capacity) || 0));
       } else if (sortBy === 'name-asc') {
         sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      } else if (sortBy === 'name-desc') {
+        sorted.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
       }
 
       renderWarehouses(sorted, currentStorageType);
