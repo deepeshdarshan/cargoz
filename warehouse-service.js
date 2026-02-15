@@ -326,21 +326,22 @@ function goToPage(page) {
   document.getElementById('cgz-resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ── View Details Helper ──
+// ── View Details ──
 
-/** Store current page warehouses for view-details redirect */
 let currentPageWarehouses = [];
 
-function viewDetails(index) {
+function goToDetail(index) {
   const wh = currentPageWarehouses[index];
   if (!wh) return;
   const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(wh)) {
-    if (value !== null && value !== undefined && value !== '') {
-      params.set(key, String(value));
+  for (const [key, val] of Object.entries(wh)) {
+    if (val !== null && val !== undefined && val !== '') {
+      params.set(key, String(val));
     }
   }
-  window.location.href = 'indetail.php?' + params.toString();
+  const url = 'indetail.php?' + params.toString();
+  console.log('Navigating to:', url);
+  window.location.assign(url);
 }
 
 // ── Warehouse Card Rendering ──
@@ -385,6 +386,8 @@ function renderWarehouses(warehouses) {
     const otherFacilities = wh.otherFacilities || '';
     const rawRate = parseFloat(wh.rate);
     const rate = (!isNaN(rawRate) && rawRate > 0) ? rawRate.toFixed(2) : '0.00';
+
+    // (detail URL built at click time via goToDetail)
 
     const imageHtml = imageUrl
       ? `<img src="${imageUrl}" alt="${name}" />`
@@ -467,7 +470,7 @@ function renderWarehouses(warehouses) {
               <div class="cgz-card-rate"><span>AED</span> <strong>${rate}</strong></div>
               <div class="cgz-rate-label">per month + VAT</div>
             </div>
-            <button class="cgz-view-details-btn" onclick="viewDetails(${idx})">
+            <button class="cgz-view-details-btn" onclick="event.preventDefault();event.stopPropagation();goToDetail(${idx});">
               View details
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
@@ -511,7 +514,7 @@ export function init() {
   window.resetFilters = resetFilters;
   window.applySortAndRender = applySortAndRender;
   window.goToPage = goToPage;
-  window.viewDetails = viewDetails;
+  window.goToDetail = goToDetail;
 
   // Search form submission
   document.getElementById('cgz-warehouseSearchForm').addEventListener('submit', async (e) => {

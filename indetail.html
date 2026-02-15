@@ -1,0 +1,255 @@
+<html>
+    <body>
+        <section class="warehouse-detail-page">
+
+            <!-- HEADER -->
+            <div class="wh-header">
+              <div>
+                <div class="stars" id="wh-stars"></div>
+                <h1 id="wh-name"></h1>
+                <p class="location" id="wh-location"></p>
+              </div>
+    
+              <div class="rating-box">
+                <div class="rating" id="wh-rating-value"></div>
+                <div class="rating-text">
+                  <span>No Reviews</span>
+                </div>
+                <a href="#" class="share-link">🔗 Share</a>
+              </div>
+            </div>
+    
+            <!-- GALLERY + SIDEBAR -->
+            <div class="wh-main">
+    
+              <!-- IMAGE GALLERY -->
+    <div class="gallery">
+      <div class="gallery-left">
+        <img src="assets/images/blog/standard/1.jpg" alt="Warehouse Image">
+        <span class="all-photos">🖼 All Photos (5)</span>
+      </div>
+    
+      <div class="gallery-right">
+        <img src="assets/images/blog/standard/1.jpg" alt="">
+        <img src="assets/images/blog/standard/1.jpg" alt="">
+        <img src="assets/images/blog/standard/1.jpg" alt="">
+        <img src="assets/images/blog/standard/1.jpg" alt="">
+      </div>
+    </div>
+
+    <!-- QUOTE CARD -->
+    <aside class="quote-card">
+        <h4>Get a Free Quote</h4>
+        <p>Request a quote to store in this warehouse</p>
+        <button>Get a Free Quote</button>
+      </aside>
+
+    </div>
+
+    <!-- DETAILS -->
+    <div class="wh-details">
+
+      <div class="detail-block">
+        <h3>What we can store</h3>
+        <div id="wh-cargo-tags"></div>
+      </div>
+
+      <div class="detail-block">
+        <h3>Storage Types</h3>
+        <div id="wh-storage-tags"></div>
+      </div>
+
+      <div class="detail-block">
+        <h3>Temperature Control</h3>
+        <div id="wh-temperature-tags"></div>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <section class="wh-extra-details">
+    <div class="wh-inner">
+
+      <!-- SAFETY & SECURITY -->
+      <div class="wh-section">
+        <h3>Safety &amp; Security</h3>
+
+        <div class="icon-list" id="wh-safety-list"></div>
+
+        <hr>
+      </div>
+
+      <!-- OTHER FACILITIES -->
+      <div class="wh-section">
+        <h3>Other Facilities</h3>
+        <div id="wh-facilities-tags"></div>
+      </div>
+
+      <!-- DOCUMENTS -->
+      <div class="wh-section">
+        <h3>Warehouse Documents</h3>
+
+        <div class="doc-status">
+          <span class="verified"><strong>✔ STOREZ Verified </strong></span>
+          <span class="not-verified"><strong> X Not Verified</strong></span>
+        </div>
+
+        <div class="doc-grid">
+          <div class="doc-item">Commercial / Trade License</div>
+          <div class="doc-item">Establishment Card</div>
+          <div class="doc-item">VAT Registration Certificate</div>
+
+          <div class="doc-item">Emirates ID</div>
+          <div class="doc-item">National ID</div>
+          <div class="doc-item">Property Documents</div>
+
+          <div class="doc-item">Insurance Certificate</div>
+          <div class="doc-item">SIRA Certificate</div>
+          <div class="doc-item">Civil Defence Certificate</div>
+
+          <div class="doc-item">Fire &amp; Safety AMC</div>
+          <div class="doc-item">Security System AMC</div>
+          <div class="doc-item">Pest Control AMC</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+
+      // Helper: get param with fallback
+      function get(key, fallback) {
+        return params.get(key) || fallback || '';
+      }
+
+      // ── Header ──
+      const name        = get('name', 'Warehouse');
+      const area        = get('area');
+      const location    = get('location');
+      const starRating  = parseFloat(get('starRating', '0'));
+      const capacity    = get('capacity');
+      const unit        = get('unit');
+
+      // Name
+      document.getElementById('wh-name').textContent = name;
+
+      // Location line: "📍 Area, Location"
+      let locText = '📍 ';
+      if (area && location) locText += area + ', ' + location;
+      else if (location) locText += location;
+      else if (area) locText += area;
+      document.getElementById('wh-location').textContent = locText;
+
+      // Star icons (filled ★ vs empty ☆)
+      let starsHtml = '';
+      for (let i = 1; i <= 5; i++) {
+        starsHtml += i <= Math.round(starRating) ? '★' : '☆';
+      }
+      document.getElementById('wh-stars').textContent = starsHtml;
+
+      // Rating value
+      document.getElementById('wh-rating-value').textContent = starRating.toFixed(1);
+
+      // ── Detail Blocks ──
+
+      // Emoji map for safety items
+      const safetyEmojis = {
+        'fire alarm': '🔥',
+        'software': '🖥️',
+        'smoke detectors': '💨',
+        'smole detectors': '💨',
+        'pest control': '🪰',
+        'cctv': '📹',
+        'security guard': '💂',
+        'fire extinguisher': '🧯',
+      };
+
+      // Emoji map for facilities
+      const facilityEmojis = {
+        'loading bay': '🚚',
+        'forklift': '🏗️',
+        'forklifts': '🏗️',
+        'parking': '🅿️',
+        'office': '🏢',
+        'racking': '🧱',
+      };
+
+      // What we can store — cargoType / typeOfWarehouse
+      const cargoType       = get('cargoType');
+      const typeOfWarehouse = get('typeOfWarehouse');
+      const cargoDisplay    = typeOfWarehouse || cargoType;
+      const cargoTagsEl     = document.getElementById('wh-cargo-tags');
+      if (cargoDisplay) {
+        cargoTagsEl.innerHTML = '<span class="tag">📦 ' + escapeHtml(cargoDisplay) + '</span>';
+      } else {
+        cargoTagsEl.innerHTML = '<span class="tag muted">Not specified</span>';
+      }
+
+      // Storage Types
+      const storageType   = get('storageType');
+      const storageTagsEl = document.getElementById('wh-storage-tags');
+      if (storageType) {
+        storageTagsEl.innerHTML = '<span class="tag">🏗 ' + escapeHtml(storageType) + '</span>';
+      } else {
+        storageTagsEl.innerHTML = '<span class="tag muted">Not specified</span>';
+      }
+
+      // Temperature Control
+      const temperature      = get('temperature');
+      const temperatureTagsEl = document.getElementById('wh-temperature-tags');
+      if (temperature) {
+        const tempEmoji = temperature.toLowerCase().includes('non') ? '🌡' : '❄';
+        temperatureTagsEl.innerHTML = '<span class="tag">' + tempEmoji + ' ' + escapeHtml(temperature) + '</span>';
+      } else {
+        temperatureTagsEl.innerHTML = '<span class="tag muted">Not specified</span>';
+      }
+
+      // ── Safety & Security ──
+      const safetyStr    = get('safetyAndSecurity');
+      const safetyListEl = document.getElementById('wh-safety-list');
+      if (safetyStr) {
+        const items = safetyStr.split('/').map(s => s.trim()).filter(Boolean);
+        safetyListEl.innerHTML = items.map(function (item) {
+          const key = item.toLowerCase();
+          let emoji = '🔒';
+          for (const [k, v] of Object.entries(safetyEmojis)) {
+            if (key.includes(k)) { emoji = v; break; }
+          }
+          return '<div class="icon-item"><span class="icon">' + emoji + '</span><span>' + escapeHtml(item) + '</span></div>';
+        }).join('');
+      } else {
+        safetyListEl.innerHTML = '<span class="muted">No safety details available</span>';
+      }
+
+      // ── Other Facilities ──
+      const facilitiesStr   = get('otherFacilities');
+      const facilitiesTagsEl = document.getElementById('wh-facilities-tags');
+      if (facilitiesStr) {
+        const items = facilitiesStr.split(',').map(s => s.trim()).filter(Boolean);
+        facilitiesTagsEl.innerHTML = items.map(function (item) {
+          const key = item.toLowerCase();
+          let emoji = '🔧';
+          for (const [k, v] of Object.entries(facilityEmojis)) {
+            if (key.includes(k)) { emoji = v; break; }
+          }
+          return '<span class="tag">' + emoji + ' ' + escapeHtml(item) + '</span>';
+        }).join(' ');
+      } else {
+        facilitiesTagsEl.innerHTML = '<span class="muted">No facilities listed</span>';
+      }
+
+      // ── Utility ──
+      function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+      }
+    })();
+  </script>
+    </body>
+</html>
