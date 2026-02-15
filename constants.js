@@ -78,12 +78,11 @@ export const SUB_LOCATIONS = {
 };
 
 export const CARGO_TYPE_OPTIONS = [
-  { id: 'cargo-general',   value: 'General Cargo',      label: 'General Cargo' },
-  { id: 'cargo-food',      value: 'Food and Beverages', label: 'Food and Beverages' },
-  { id: 'cargo-dangerous', value: 'Dangerous Goods',    label: 'Dangerous Goods' },
-  { id: 'cargo-chemicals', value: 'Chemicals',          label: 'Chemicals' },
-  { id: 'cargo-medical',   value: 'Medical',            label: 'Medical' },
-  { id: 'cargo-pharma',    value: 'Pharma',             label: 'Pharma' },
+  { id: 'cargo-general',        value: 'General',            label: 'General' },
+  { id: 'cargo-food',           value: 'Food',               label: 'Food' },
+  { id: 'cargo-chemical',       value: 'Chemical',           label: 'Chemical' },
+  { id: 'cargo-non-perishable', value: 'Non perishable',     label: 'Non Perishable' },
+  { id: 'cargo-non-hazard',     value: 'Non Hazard',         label: 'Non Hazard' },
 ];
 
 export const STORAGE_TYPE_OPTIONS = [
