@@ -47,7 +47,7 @@ export async function searchByLocation(location) {
   const warehousesRef = collection(db, "warehouses");
   const q = query(
     warehousesRef,
-    where("location", "==", location.toLowerCase())
+    where("location", "==", location)
   );
 
   const snapshot = await getDocs(q);

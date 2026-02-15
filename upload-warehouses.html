@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Warehouses to Firestore</title>
+  <style>
+    body { font-family: 'Inter', sans-serif; padding: 2rem; background: #1a1a2e; color: #e0e0e0; }
+    h1 { color: #3ecfb1; margin-bottom: 1rem; }
+    p { color: #9ca3af; line-height: 1.6; margin-bottom: 0.5rem; }
+    code { background: #2d2d44; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+
+    .start-btn {
+      margin-top: 1.5rem;
+      padding: 0.75rem 2.5rem;
+      background: linear-gradient(135deg, #3ecfb1 0%, #38c5a7 100%);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    .start-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #36bfa3 0%, #2fb899 100%);
+      box-shadow: 0 4px 14px rgba(62, 207, 177, 0.35);
+      transform: translateY(-1px);
+    }
+    .start-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #uploadStatus {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      min-height: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Upload Warehouses to Firestore</h1>
+  <p>Make sure you have pasted your warehouse JSON array into <code>WAREHOUSE_DATA</code> in <code>upload-warehouses.js</code>.</p>
+  <p>Open the <strong>browser console</strong> (F12 → Console) to see detailed upload logs.</p>
+
+  <button class="start-btn" id="startBtn" onclick="startUpload()">Start Upload</button>
+  <div id="uploadStatus"></div>
+
+  <script type="module" src="./upload-warehouses.js"></script>
+</body>
+</html>

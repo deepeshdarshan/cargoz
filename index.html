@@ -29,16 +29,7 @@
             </svg>
           </span>
           <select id="location" name="location">
-            <option value="uae">UAE</option>
-            <option value="abu dhabi">Abu Dhabi</option>
-            <option value="saudi arabia">Saudi Arabia</option>
-            <option value="qatar">Qatar</option>
-            <option value="bahrain">Bahrain</option>
-            <option value="kuwait">Kuwait</option>
-            <option value="oman">Oman</option>
-            <option value="jordan">Jordan</option>
-            <option value="iraq">Iraq</option>
-            <option value="lebanon">Lebanon</option>
+            <!-- Populated dynamically from MAIN_LOCATIONS -->
           </select>
           <span class="select-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
@@ -104,106 +95,45 @@
     <aside class="filter-sidebar">
       <div class="filter-title">Filter By</div>
 
-      <!-- Location Filter -->
+      <!-- Filter sections — bodies populated dynamically from constants.js -->
       <div class="filter-section" data-filter="filterLocation">
         <div class="filter-header" onclick="toggleFilter(this)">
           <h4>Location</h4>
           <svg class="filter-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
         </div>
-        <div class="filter-body">
-          <div class="filter-option"><input type="checkbox" id="loc-alqusais" data-group="filterLocation" value="Al Qusais" onchange="applyFilters()"><label for="loc-alqusais">Al Qusais</label></div>
-          <div class="filter-option"><input type="checkbox" id="loc-alquoz" data-group="filterLocation" value="Al Quoz" onchange="applyFilters()"><label for="loc-alquoz">Al Quoz</label></div>
-          <div class="filter-option"><input type="checkbox" id="loc-jafza" data-group="filterLocation" value="Jafza" onchange="applyFilters()"><label for="loc-jafza">Jafza</label></div>
-          <div class="filter-option"><input type="checkbox" id="loc-ummramool" data-group="filterLocation" value="Umm Ramool" onchange="applyFilters()"><label for="loc-ummramool">Umm Ramool</label></div>
-          <div class="filter-option"><input type="checkbox" id="loc-dip" data-group="filterLocation" value="DIP1 & DIP2" onchange="applyFilters()"><label for="loc-dip">DIP1 &amp; DIP2</label></div>
-          <div class="filter-option"><input type="checkbox" id="loc-dic" data-group="filterLocation" value="Dubai Industrial City" onchange="applyFilters()"><label for="loc-dic">Dubai Industrial City</label></div>
-          <div class="filter-option"><input type="checkbox" id="loc-rak" data-group="filterLocation" value="Rass Al Khor" onchange="applyFilters()"><label for="loc-rak">Rass Al Khor</label></div>
-          <div class="filter-option"><input type="checkbox" id="loc-ic" data-group="filterLocation" value="International City" onchange="applyFilters()"><label for="loc-ic">International City</label></div>
-          <div class="filter-option"><input type="checkbox" id="loc-jaia" data-group="filterLocation" value="Jebal Ali Industrial Area" onchange="applyFilters()"><label for="loc-jaia">Jebal Ali Industrial Area</label></div>
-          <div class="filter-option"><input type="checkbox" id="loc-dmcc" data-group="filterLocation" value="DMCC" onchange="applyFilters()"><label for="loc-dmcc">DMCC</label></div>
-          <div class="filter-option"><input type="checkbox" id="loc-ruwayyah" data-group="filterLocation" value="Al Ruwayyah" onchange="applyFilters()"><label for="loc-ruwayyah">Al Ruwayyah</label></div>
-        </div>
+        <div class="filter-body" id="filterLocationBody"></div>
       </div>
 
-      <!-- Cargo Type Filter -->
       <div class="filter-section" data-filter="filterCargoType">
         <div class="filter-header" onclick="toggleFilter(this)">
           <h4>Cargo Type</h4>
           <svg class="filter-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
         </div>
-        <div class="filter-body">
-          <div class="filter-option"><input type="checkbox" id="cargo-general" data-group="filterCargoType" value="General Cargo" onchange="applyFilters()"><label for="cargo-general">General Cargo</label></div>
-          <div class="filter-option"><input type="checkbox" id="cargo-food" data-group="filterCargoType" value="Food and Beverages" onchange="applyFilters()"><label for="cargo-food">Food and Beverages</label></div>
-          <div class="filter-option"><input type="checkbox" id="cargo-dangerous" data-group="filterCargoType" value="Dangerous Goods" onchange="applyFilters()"><label for="cargo-dangerous">Dangerous Goods</label></div>
-          <div class="filter-option"><input type="checkbox" id="cargo-chemicals" data-group="filterCargoType" value="Chemicals" onchange="applyFilters()"><label for="cargo-chemicals">Chemicals</label></div>
-          <div class="filter-option"><input type="checkbox" id="cargo-medical" data-group="filterCargoType" value="Medical" onchange="applyFilters()"><label for="cargo-medical">Medical</label></div>
-          <div class="filter-option"><input type="checkbox" id="cargo-pharma" data-group="filterCargoType" value="Pharma" onchange="applyFilters()"><label for="cargo-pharma">Pharma</label></div>
-        </div>
+        <div class="filter-body" id="filterCargoTypeBody"></div>
       </div>
 
-      <!-- Storage Type Filter -->
       <div class="filter-section" data-filter="filterStorageType">
         <div class="filter-header" onclick="toggleFilter(this)">
           <h4>Storage Type</h4>
           <svg class="filter-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
         </div>
-        <div class="filter-body">
-          <div class="filter-option"><input type="checkbox" id="st-bulk" data-group="filterStorageType" value="Bulk Space" onchange="applyFilters()"><label for="st-bulk">Bulk Space</label></div>
-          <div class="filter-option"><input type="checkbox" id="st-rack" data-group="filterStorageType" value="Rack Space" onchange="applyFilters()"><label for="st-rack">Rack Space</label></div>
-          <div class="filter-option"><input type="checkbox" id="st-individual" data-group="filterStorageType" value="Individual Unit" onchange="applyFilters()"><label for="st-individual">Individual Unit</label></div>
-          <div class="filter-option"><input type="checkbox" id="st-lockable" data-group="filterStorageType" value="Lockable Unit" onchange="applyFilters()"><label for="st-lockable">Lockable Unit</label></div>
-          <div class="filter-option"><input type="checkbox" id="st-cage" data-group="filterStorageType" value="Cage" onchange="applyFilters()"><label for="st-cage">Cage</label></div>
-          <div class="filter-option"><input type="checkbox" id="st-openyard" data-group="filterStorageType" value="Open Yard" onchange="applyFilters()"><label for="st-openyard">Open Yard</label></div>
-          <div class="filter-option"><input type="checkbox" id="st-closedyard" data-group="filterStorageType" value="Closed Yard" onchange="applyFilters()"><label for="st-closedyard">Closed Yard</label></div>
-        </div>
+        <div class="filter-body" id="filterStorageTypeBody"></div>
       </div>
 
-      <!-- Temperature Filter -->
       <div class="filter-section" data-filter="filterTemperature">
         <div class="filter-header" onclick="toggleFilter(this)">
           <h4>Temperature</h4>
           <svg class="filter-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
         </div>
-        <div class="filter-body">
-          <div class="filter-option"><input type="checkbox" id="temp-ac" data-group="filterTemperature" value="Air Conditioned" onchange="applyFilters()"><label for="temp-ac">Air Conditioned</label></div>
-          <div class="filter-option"><input type="checkbox" id="temp-nonac" data-group="filterTemperature" value="Non-Air Conditioned" onchange="applyFilters()"><label for="temp-nonac">Non-Air Conditioned</label></div>
-          <div class="filter-option"><input type="checkbox" id="temp-ambient" data-group="filterTemperature" value="Ambient" onchange="applyFilters()"><label for="temp-ambient">Ambient (21°C to 25°C)</label></div>
-          <div class="filter-option"><input type="checkbox" id="temp-chilled" data-group="filterTemperature" value="Chilled Storage" onchange="applyFilters()"><label for="temp-chilled">Chilled Storage (1°C to 5°C)</label></div>
-          <div class="filter-option"><input type="checkbox" id="temp-cold" data-group="filterTemperature" value="Cold Storage" onchange="applyFilters()"><label for="temp-cold">Cold Storage (-18°C to 0°C)</label></div>
-          <div class="filter-option"><input type="checkbox" id="temp-frozen" data-group="filterTemperature" value="Frozen" onchange="applyFilters()"><label for="temp-frozen">Frozen (-30°C to -17°C)</label></div>
-          <div class="filter-option"><input type="checkbox" id="temp-cool" data-group="filterTemperature" value="Cool Storage" onchange="applyFilters()"><label for="temp-cool">Cool Storage (6°C to 20°C)</label></div>
-          <div class="filter-option"><input type="checkbox" id="temp-open" data-group="filterTemperature" value="Open Area" onchange="applyFilters()"><label for="temp-open">Open Area</label></div>
-        </div>
+        <div class="filter-body" id="filterTemperatureBody"></div>
       </div>
 
-      <!-- Star Rating Filter -->
       <div class="filter-section" data-filter="filterStarRating">
         <div class="filter-header" onclick="toggleFilter(this)">
           <h4>Star Rating</h4>
           <svg class="filter-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
         </div>
-        <div class="filter-body">
-          <div class="filter-option">
-            <input type="checkbox" id="star-5" data-group="filterStarRating" value="5" onchange="applyFilters()">
-            <label for="star-5" class="star-row"><span class="stars"><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></span></label>
-          </div>
-          <div class="filter-option">
-            <input type="checkbox" id="star-4" data-group="filterStarRating" value="4" onchange="applyFilters()">
-            <label for="star-4" class="star-row"><span class="stars"><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon empty" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></span></label>
-          </div>
-          <div class="filter-option">
-            <input type="checkbox" id="star-3" data-group="filterStarRating" value="3" onchange="applyFilters()">
-            <label for="star-3" class="star-row"><span class="stars"><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon empty" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon empty" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></span></label>
-          </div>
-          <div class="filter-option">
-            <input type="checkbox" id="star-2" data-group="filterStarRating" value="2" onchange="applyFilters()">
-            <label for="star-2" class="star-row"><span class="stars"><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon empty" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon empty" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon empty" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></span></label>
-          </div>
-          <div class="filter-option">
-            <input type="checkbox" id="star-1" data-group="filterStarRating" value="1" onchange="applyFilters()">
-            <label for="star-1" class="star-row"><span class="stars"><svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon empty" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon empty" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon empty" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><svg class="star-icon empty" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></span></label>
-          </div>
-        </div>
+        <div class="filter-body" id="filterStarRatingBody"></div>
       </div>
 
     </aside>
@@ -223,18 +153,75 @@
         </div>
       </div>
       <div id="warehouseList"></div>
+      <div class="pagination" id="paginationControls"></div>
     </div>
 
   </div>
 
   <!-- Single module script: constants, UI helpers, Firebase integration -->
   <script type="module">
-    import { CONVERSION_TO_SQFT, UNIT_LABELS, VALIDATION_LABELS } from './constants.js';
+    import {
+      CONVERSION_TO_SQFT, UNIT_LABELS, VALIDATION_LABELS,
+      MAIN_LOCATIONS, SUB_LOCATIONS,
+      CARGO_TYPE_OPTIONS, STORAGE_TYPE_OPTIONS,
+      TEMPERATURE_OPTIONS, STAR_RATING_OPTIONS, STAR_SVG_PATH,
+      PAGE_SIZE
+    } from './constants.js';
     import { searchByLocation, filterByCapacity } from './warehouse-service.js';
 
     // ── State ──
     let currentResults = [];
     let currentStorageType = 'SQFT';
+    let filteredSorted = [];
+    let currentPage = 1;
+
+    // ── Build Filter Sidebar from Constants ──
+
+    /** Render a standard checkbox filter section */
+    function renderCheckboxFilter(containerId, groupName, options) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = options.map(opt => `
+        <div class="filter-option">
+          <input type="checkbox" id="${opt.id}" data-group="${groupName}" value="${opt.value}" onchange="applyFilters()">
+          <label for="${opt.id}">${opt.label}</label>
+        </div>
+      `).join('');
+    }
+
+    /** Render the star-rating filter with SVG stars */
+    function renderStarRatingFilter(containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = STAR_RATING_OPTIONS.map(rating => {
+        const starsHtml = Array.from({ length: 5 }, (_, i) => {
+          const cls = i < rating ? 'star-icon' : 'star-icon empty';
+          return `<svg class="${cls}" viewBox="0 0 20 20" fill="currentColor"><path d="${STAR_SVG_PATH}"/></svg>`;
+        }).join('');
+
+        return `
+          <div class="filter-option">
+            <input type="checkbox" id="star-${rating}" data-group="filterStarRating" value="${rating}" onchange="applyFilters()">
+            <label for="star-${rating}" class="star-row"><span class="stars">${starsHtml}</span></label>
+          </div>`;
+      }).join('');
+    }
+
+    // Populate the main location search dropdown
+    const locationSelect = document.getElementById('location');
+    locationSelect.innerHTML = MAIN_LOCATIONS.map(loc =>
+      `<option value="${loc.value}">${loc.label}</option>`
+    ).join('');
+
+    // Populate static filter sections (location is populated dynamically on search)
+    renderCheckboxFilter('filterCargoTypeBody',   'filterCargoType',   CARGO_TYPE_OPTIONS);
+    renderCheckboxFilter('filterStorageTypeBody', 'filterStorageType', STORAGE_TYPE_OPTIONS);
+    renderCheckboxFilter('filterTemperatureBody', 'filterTemperature', TEMPERATURE_OPTIONS);
+    renderStarRatingFilter('filterStarRatingBody');
+
+    /** Update the location filter sidebar with sub-locations for the selected main location */
+    function updateLocationFilter(mainLocation) {
+      const subLocations = SUB_LOCATIONS[mainLocation] || [];
+      renderCheckboxFilter('filterLocationBody', 'filterLocation', subLocations);
+    }
 
     // ── UI Helper Functions ──
 
@@ -317,7 +304,7 @@
 
         if (selectedTemperatures.length > 0) {
           const whTemp = (wh.temperature || '').toLowerCase();
-          if (!selectedTemperatures.some(t => whTemp === t)) return false;
+          if (!selectedTemperatures.some(t => whTemp.includes(t))) return false;
         }
 
         if (selectedStarRatings.length > 0) {
@@ -329,19 +316,95 @@
       });
 
       const sortBy = document.getElementById('sortBy').value;
-      const sorted = [...filtered];
+      filteredSorted = [...filtered];
 
       if (sortBy === 'capacity-desc') {
-        sorted.sort((a, b) => (parseFloat(b.capacity) || 0) - (parseFloat(a.capacity) || 0));
+        filteredSorted.sort((a, b) => (parseFloat(b.capacity) || 0) - (parseFloat(a.capacity) || 0));
       } else if (sortBy === 'capacity-asc') {
-        sorted.sort((a, b) => (parseFloat(a.capacity) || 0) - (parseFloat(b.capacity) || 0));
+        filteredSorted.sort((a, b) => (parseFloat(a.capacity) || 0) - (parseFloat(b.capacity) || 0));
       } else if (sortBy === 'name-asc') {
-        sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        filteredSorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
       } else if (sortBy === 'name-desc') {
-        sorted.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+        filteredSorted.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
       }
 
-      renderWarehouses(sorted, currentStorageType);
+      currentPage = 1;
+      renderPage();
+    }
+
+    /** Render the current page of results + pagination controls */
+    function renderPage() {
+      const totalPages = Math.ceil(filteredSorted.length / PAGE_SIZE);
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const pageItems = filteredSorted.slice(start, start + PAGE_SIZE);
+
+      renderWarehouses(pageItems);
+      renderPagination(totalPages);
+    }
+
+    /** Build and insert pagination buttons */
+    function renderPagination(totalPages) {
+      const container = document.getElementById('paginationControls');
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let html = '';
+
+      // Previous button
+      html += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:14px;height:14px;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+        </svg>
+        Prev
+      </button>`;
+
+      // Page number buttons
+      const maxVisible = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+      if (endPage - startPage < maxVisible - 1) {
+        startPage = Math.max(1, endPage - maxVisible + 1);
+      }
+
+      if (startPage > 1) {
+        html += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
+        if (startPage > 2) html += `<span class="page-ellipsis">...</span>`;
+      }
+
+      for (let p = startPage; p <= endPage; p++) {
+        html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) html += `<span class="page-ellipsis">...</span>`;
+        html += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+      }
+
+      // Next button
+      html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">
+        Next
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:14px;height:14px;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>`;
+
+      // Results count summary
+      const start = (currentPage - 1) * PAGE_SIZE + 1;
+      const end = Math.min(currentPage * PAGE_SIZE, filteredSorted.length);
+      html += `<div class="page-info">Showing ${start}–${end} of ${filteredSorted.length}</div>`;
+
+      container.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      const totalPages = Math.ceil(filteredSorted.length / PAGE_SIZE);
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderPage();
+      // Scroll to top of results
+      document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function showEmpty(location) {
@@ -355,27 +418,20 @@
         </div>`;
     }
 
-    function displayCapacity(sqftValue, storageType) {
-      const factor = CONVERSION_TO_SQFT[storageType] || 1;
-      const converted = sqftValue / factor;
-      if (storageType === 'Pallet') return Math.floor(converted).toLocaleString();
-      if (storageType === 'CBM') return converted.toFixed(1);
-      return Math.round(converted).toLocaleString();
-    }
-
-    function renderWarehouses(warehouses, storageType) {
+    function renderWarehouses(warehouses) {
       const list = document.getElementById('warehouseList');
-      const unit = UNIT_LABELS[storageType] || 'SQFT';
 
       if (warehouses.length === 0) {
         const location = document.getElementById('location').value;
         showEmpty(location);
+        document.getElementById('paginationControls').innerHTML = '';
         return;
       }
 
       list.innerHTML = warehouses.map((wh) => {
-        const capacitySqft = parseFloat(wh.capacity) || 0;
-        const displayCap = displayCapacity(capacitySqft, storageType);
+        const capacity = parseFloat(wh.capacity) || 0;
+        const whUnit = wh.unit || 'Sqft';
+        const displayCap = capacity.toLocaleString();
         const imageUrl = wh.imageUrl || wh['image-url'] || '';
         const name = wh.name || wh.id;
         const location = wh.location || '';
@@ -384,6 +440,9 @@
         const whStorageType = wh.storageType || '';
         const temperature = wh.temperature || '';
         const starRating = parseInt(wh.starRating || 0);
+        const typeOfWarehouse = wh.typeOfWarehouse || '';
+        const safetyAndSecurity = wh.safetyAndSecurity || '';
+        const otherFacilities = wh.otherFacilities || '';
 
         const imageHtml = imageUrl
           ? `<img src="${imageUrl}" alt="${name}" />`
@@ -395,9 +454,8 @@
 
         let starsHtml = '';
         for (let i = 1; i <= 5; i++) {
-          starsHtml += i <= starRating
-            ? '<svg class="star-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>'
-            : '<svg class="star-icon empty" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>';
+          const cls = i <= starRating ? 'star-icon' : 'star-icon empty';
+          starsHtml += `<svg class="${cls}" viewBox="0 0 20 20" fill="currentColor"><path d="${STAR_SVG_PATH}"/></svg>`;
         }
 
         const locationDisplay = area
@@ -424,6 +482,12 @@
                     </svg>
                     ${cargoType}
                   </span>` : ''}
+                  ${typeOfWarehouse ? `<span class="tag">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+                    </svg>
+                    ${typeOfWarehouse}
+                  </span>` : ''}
                   ${whStorageType ? `<span class="tag">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3H21m-3.75 3H21" />
@@ -440,13 +504,25 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L12 12.75l-5.571-3m11.142 0 4.179 2.25L12 17.25l-9.75-5.25 4.179-2.25" />
                     </svg>
-                    ${displayCap} ${unit}
+                    ${displayCap} ${whUnit}
                   </span>
+                  ${safetyAndSecurity ? `<span class="tag">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                    </svg>
+                    ${safetyAndSecurity}
+                  </span>` : ''}
+                  ${otherFacilities ? `<span class="tag">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.049.58.025 1.194-.14 1.743" />
+                    </svg>
+                    ${otherFacilities}
+                  </span>` : ''}
                 </div>
               </div>
               <div class="card-meta">
                 <div>
-                  <div class="card-capacity"><strong>${displayCap}</strong> <span>/${unit}</span></div>
+                  <div class="card-capacity"><strong>${displayCap}</strong> <span>/${whUnit}</span></div>
                   <div class="capacity-label">available capacity</div>
                 </div>
                 <button class="view-details-btn" onclick="alert('Details for ${name}')">
@@ -471,6 +547,7 @@
     window.applyFilters = applyFilters;
     window.resetFilters = resetFilters;
     window.applySortAndRender = applySortAndRender;
+    window.goToPage = goToPage;
 
     // ── Search Form Submission ──
     document.getElementById('warehouseSearchForm').addEventListener('submit', async (e) => {
@@ -495,6 +572,7 @@
       const searchBtn = document.getElementById('searchBtn');
       searchBtn.classList.add('loading');
       resetFilters();
+      updateLocationFilter(location);
       showLoading();
 
       try {
@@ -508,6 +586,7 @@
             <p>Something went wrong. Please try again.</p>
             <p style="font-size:0.75rem;color:#9ca3af;margin-top:0.5rem;">${error.message}</p>
           </div>`;
+        document.getElementById('paginationControls').innerHTML = '';
       } finally {
         searchBtn.classList.remove('loading');
       }
