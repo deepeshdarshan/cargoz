@@ -383,24 +383,24 @@ body {
   text-align: right;
 }
 
-.card-capacity {
+.card-rate {
   font-size: 0.8rem;
   color: #6b7280;
   margin-bottom: 0.25rem;
 }
 
-.card-capacity strong {
+.card-rate strong {
   font-size: 1.15rem;
   color: #1f2937;
   font-weight: 700;
 }
 
-.card-capacity span {
+.card-rate span {
   font-size: 0.8rem;
   color: #6b7280;
 }
 
-.capacity-label {
+.rate-label {
   font-size: 0.72rem;
   color: #9ca3af;
 }

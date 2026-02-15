@@ -17,7 +17,7 @@ const db = getFirestore(app);
 /**
  * Convert a value from the given unit to SQFT.
  * @param {number} value
- * @param {string} fromUnit - "SQFT" | "CBM" | "Pallet"
+ * @param {string} fromUnit - "SQFT" | "SQM" | "Pallet"
  * @returns {number} - value in SQFT
  */
 export function convertToSqft(value, fromUnit) {
@@ -28,7 +28,7 @@ export function convertToSqft(value, fromUnit) {
 /**
  * Convert a SQFT value to the given display unit.
  * @param {number} sqftValue
- * @param {string} toUnit - "SQFT" | "CBM" | "Pallet"
+ * @param {string} toUnit - "SQFT" | "SQM" | "Pallet"
  * @returns {number}
  */
 export function convertFromSqft(sqftValue, toUnit) {
@@ -61,14 +61,32 @@ export async function searchByLocation(location) {
 }
 
 /**
- * Client-side filter: keep only warehouses whose capacity (stored in SQFT)
- * meets the user's requirement (which may be in CBM or Pallets).
+ * Normalise a unit string from the database to its CONVERSION_TO_SQFT key.
+ * e.g. "Sqft" → "SQFT", "sqm" → "SQM", "pallet" → "Pallet", "pallets" → "Pallet"
  *
- * The user's value is first converted to SQFT before comparison.
+ * @param {string} unit - raw unit value from the warehouse document
+ * @returns {string} - normalised key that exists in CONVERSION_TO_SQFT
+ */
+function normaliseUnit(unit) {
+  if (!unit) return 'SQFT';
+  const u = unit.trim().toLowerCase();
+  if (u === 'sqft' || u === 'sq ft' || u === 'sq.ft')  return 'SQFT';
+  if (u === 'sqm'  || u === 'sq m'  || u === 'sq.m')   return 'SQM';
+  if (u === 'pallet' || u === 'pallets')                return 'Pallet';
+  return 'SQFT'; // fallback
+}
+
+/**
+ * Client-side filter: keep only warehouses whose capacity is exactly equal
+ * to the user's requirement after converting both values to a common unit (SQFT).
+ *
+ * Each warehouse stores its own `capacity` + `unit` (e.g. 400 Sqft, 50 SQM,
+ * 30 Pallets).  The user's search value may be in any supported unit.
+ * Both are converted to SQFT and compared.
  *
  * @param {Array}  warehouses   - Array of warehouse objects from Firestore
- * @param {string} storageType  - "SQFT" | "CBM" | "Pallet"
- * @param {number|null} value   - Required area/volume in the user's chosen unit
+ * @param {string} storageType  - "SQFT" | "SQM" | "Pallet" (user's chosen unit)
+ * @param {number|null} value   - Required area in the user's chosen unit
  * @returns {Array} - Filtered array
  */
 export function filterByCapacity(warehouses, storageType, value) {
@@ -76,11 +94,17 @@ export function filterByCapacity(warehouses, storageType, value) {
     return warehouses;
   }
 
-  // Convert user input to SQFT for comparison against backend data
+  // Convert user input to SQFT
   const requiredSqft = convertToSqft(value, storageType);
 
   return warehouses.filter((wh) => {
-    const capacitySqft = parseFloat(wh.capacity) || 0;
-    return capacitySqft === requiredSqft;
+    const whCapacity = parseFloat(wh.capacity) || 0;
+    const whUnit = normaliseUnit(wh.unit);
+
+    // Convert warehouse capacity to SQFT using its own unit
+    const whCapacitySqft = convertToSqft(whCapacity, whUnit);
+
+    // Compare in SQFT (round to 2 decimals to avoid floating-point drift)
+    return Math.round(whCapacitySqft * 100) === Math.round(requiredSqft * 100);
   });
 }

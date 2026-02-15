@@ -51,7 +51,7 @@
           <select id="storageType" name="storageType" onchange="updateUnit()">
             <option value="">All Types</option>
             <option value="SQFT">Store by Area (SQFT)</option>
-            <option value="CBM">Store by Volume (CBM)</option>
+            <option value="SQM">Store by Area (SQM)</option>
             <option value="Pallet">Pallet</option>
           </select>
           <span class="select-arrow">
@@ -241,9 +241,9 @@
         if (storageType === 'SQFT') {
           unitBadge.textContent = 'SQFT';
           areaLabel.textContent = 'Required Area';
-        } else if (storageType === 'CBM') {
-          unitBadge.textContent = 'CBM';
-          areaLabel.textContent = 'Required Volume';
+        } else if (storageType === 'SQM') {
+          unitBadge.textContent = 'SQM';
+          areaLabel.textContent = 'Required Area';
         } else if (storageType === 'Pallet') {
           unitBadge.textContent = 'Pallets';
           areaLabel.textContent = 'No. of Pallets';
@@ -443,6 +443,8 @@
         const typeOfWarehouse = wh.typeOfWarehouse || '';
         const safetyAndSecurity = wh.safetyAndSecurity || '';
         const otherFacilities = wh.otherFacilities || '';
+        const rawRate = parseFloat(wh.rate);
+        const rate = (!isNaN(rawRate) && rawRate > 0) ? rawRate.toFixed(2) : '0.00';
 
         const imageHtml = imageUrl
           ? `<img src="${imageUrl}" alt="${name}" />`
@@ -522,8 +524,8 @@
               </div>
               <div class="card-meta">
                 <div>
-                  <div class="card-capacity"><strong>${displayCap}</strong> <span>/${whUnit}</span></div>
-                  <div class="capacity-label">available capacity</div>
+                  <div class="card-rate"><span>AED</span> <strong>${rate}</strong></div>
+                  <div class="rate-label">per month + VAT</div>
                 </div>
                 <button class="view-details-btn" onclick="alert('Details for ${name}')">
                   View details
