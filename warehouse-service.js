@@ -1,4 +1,4 @@
-// Warehouse Search Service — Firestore queries
+// CargoZ — Warehouse Search Service + UI Logic
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
 import {
   getFirestore,
@@ -8,9 +8,18 @@ import {
   getDocs
 } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 import firebaseConfig from "./firebase-config.js";
-import { CONVERSION_TO_SQFT } from "./constants.js";
+import {
+  CONVERSION_TO_SQFT, UNIT_LABELS, VALIDATION_LABELS,
+  MAIN_LOCATIONS, SUB_LOCATIONS,
+  CARGO_TYPE_OPTIONS, STORAGE_TYPE_OPTIONS,
+  TEMPERATURE_OPTIONS, STAR_RATING_OPTIONS, STAR_SVG_PATH,
+  PAGE_SIZE
+} from "./constants.js";
 
-// Initialize Firebase & Firestore
+// ══════════════════════════════════════════
+// ── Firebase / Firestore Service Layer ──
+// ══════════════════════════════════════════
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -37,11 +46,9 @@ export function convertFromSqft(sqftValue, toUnit) {
 }
 
 /**
- * Search warehouses by location (country).
- * Additional filtering (capacity, storage type) is done client-side.
- *
- * @param {string} location - Country name in lowercase (e.g. "uae", "saudi arabia")
- * @returns {Promise<Array>} - Array of warehouse objects
+ * Search warehouses by location.
+ * @param {string} location
+ * @returns {Promise<Array>}
  */
 export async function searchByLocation(location) {
   const warehousesRef = collection(db, "warehouses");
@@ -62,10 +69,8 @@ export async function searchByLocation(location) {
 
 /**
  * Normalise a unit string from the database to its CONVERSION_TO_SQFT key.
- * e.g. "Sqft" → "SQFT", "sqm" → "SQM", "pallet" → "Pallet", "pallets" → "Pallet"
- *
- * @param {string} unit - raw unit value from the warehouse document
- * @returns {string} - normalised key that exists in CONVERSION_TO_SQFT
+ * @param {string} unit
+ * @returns {string}
  */
 function normaliseUnit(unit) {
   if (!unit) return 'SQFT';
@@ -73,38 +78,496 @@ function normaliseUnit(unit) {
   if (u === 'sqft' || u === 'sq ft' || u === 'sq.ft')  return 'SQFT';
   if (u === 'sqm'  || u === 'sq m'  || u === 'sq.m')   return 'SQM';
   if (u === 'pallet' || u === 'pallets')                return 'Pallet';
-  return 'SQFT'; // fallback
+  return 'SQFT';
 }
 
 /**
- * Client-side filter: keep only warehouses whose capacity is exactly equal
- * to the user's requirement after converting both values to a common unit (SQFT).
- *
- * Each warehouse stores its own `capacity` + `unit` (e.g. 400 Sqft, 50 SQM,
- * 30 Pallets).  The user's search value may be in any supported unit.
- * Both are converted to SQFT and compared.
- *
- * @param {Array}  warehouses   - Array of warehouse objects from Firestore
- * @param {string} storageType  - "SQFT" | "SQM" | "Pallet" (user's chosen unit)
- * @param {number|null} value   - Required area in the user's chosen unit
- * @returns {Array} - Filtered array
+ * Client-side filter: keep only warehouses whose capacity matches
+ * the user's requirement after converting both to SQFT.
+ * @param {Array}  warehouses
+ * @param {string} storageType - "SQFT" | "SQM" | "Pallet"
+ * @param {number|null} value
+ * @returns {Array}
  */
 export function filterByCapacity(warehouses, storageType, value) {
   if (!value || value <= 0) {
     return warehouses;
   }
 
-  // Convert user input to SQFT
   const requiredSqft = convertToSqft(value, storageType);
 
   return warehouses.filter((wh) => {
     const whCapacity = parseFloat(wh.capacity) || 0;
     const whUnit = normaliseUnit(wh.unit);
-
-    // Convert warehouse capacity to SQFT using its own unit
     const whCapacitySqft = convertToSqft(whCapacity, whUnit);
-
-    // Compare in SQFT (round to 2 decimals to avoid floating-point drift)
     return Math.round(whCapacitySqft * 100) === Math.round(requiredSqft * 100);
   });
+}
+
+// ══════════════════════════════════════════
+// ── UI / Application Layer ──
+// ══════════════════════════════════════════
+
+// ── State ──
+let currentResults = [];
+let currentStorageType = 'SQFT';
+let filteredSorted = [];
+let currentPage = 1;
+
+// ── Filter Rendering ──
+
+function renderCheckboxFilter(containerId, groupName, options) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = options.map(opt => `
+    <div class="cgz-filter-option">
+      <input type="checkbox" id="${opt.id}" data-group="${groupName}" value="${opt.value}" onchange="applyFilters()">
+      <label for="${opt.id}">${opt.label}</label>
+    </div>
+  `).join('');
+}
+
+function renderStarRatingFilter(containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = STAR_RATING_OPTIONS.map(rating => {
+    const starsHtml = Array.from({ length: 5 }, (_, i) => {
+      const cls = i < rating ? 'cgz-star-icon' : 'cgz-star-icon cgz-empty';
+      return `<svg class="${cls}" viewBox="0 0 20 20" fill="currentColor"><path d="${STAR_SVG_PATH}"/></svg>`;
+    }).join('');
+
+    return `
+      <div class="cgz-filter-option">
+        <input type="checkbox" id="star-${rating}" data-group="filterStarRating" value="${rating}" onchange="applyFilters()">
+        <label for="star-${rating}" class="cgz-star-row"><span class="cgz-stars">${starsHtml}</span></label>
+      </div>`;
+  }).join('');
+}
+
+function updateLocationFilter(mainLocation) {
+  const subLocations = SUB_LOCATIONS[mainLocation] || [];
+  renderCheckboxFilter('cgz-filterLocationBody', 'filterLocation', subLocations);
+}
+
+// ── UI Helpers ──
+
+function updateUnit() {
+  const storageType = document.getElementById('cgz-storageType').value;
+  const unitBadge = document.getElementById('cgz-unitBadge');
+  const areaLabel = document.getElementById('cgz-areaLabel');
+  const areaGroup = document.getElementById('cgz-areaGroup');
+  const areaInput = document.getElementById('cgz-areaValue');
+
+  if (!storageType) {
+    areaGroup.style.display = 'none';
+    areaInput.value = '';
+  } else {
+    areaGroup.style.display = '';
+
+    if (storageType === 'SQFT') {
+      unitBadge.textContent = 'SQFT';
+      areaLabel.textContent = 'Required Area';
+    } else if (storageType === 'SQM') {
+      unitBadge.textContent = 'SQM';
+      areaLabel.textContent = 'Required Area';
+    } else if (storageType === 'Pallet') {
+      unitBadge.textContent = 'Pallets';
+      areaLabel.textContent = 'No. of Pallets';
+    }
+  }
+}
+
+function showLoading() {
+  document.getElementById('cgz-contentArea').style.display = 'flex';
+  const list = document.getElementById('cgz-warehouseList');
+  list.innerHTML = `
+    <div class="cgz-loading-state">
+      <div class="cgz-spinner"></div>
+      <p>Searching warehouses...</p>
+    </div>`;
+}
+
+// ── Filter Logic ──
+
+function resetFilters() {
+  document.querySelectorAll('.cgz-filter-sidebar input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+  });
+}
+
+function toggleFilter(headerEl) {
+  const section = headerEl.closest('.cgz-filter-section');
+  section.classList.toggle('cgz-collapsed');
+}
+
+function getCheckedValues(group) {
+  const checkboxes = document.querySelectorAll(`input[data-group="${group}"]:checked`);
+  return Array.from(checkboxes).map(cb => cb.value.toLowerCase());
+}
+
+function applyFilters() {
+  const selectedLocations = getCheckedValues('filterLocation');
+  const selectedCargoTypes = getCheckedValues('filterCargoType');
+  const selectedStorageTypes = getCheckedValues('filterStorageType');
+  const selectedTemperatures = getCheckedValues('filterTemperature');
+  const selectedStarRatings = getCheckedValues('filterStarRating').map(Number);
+
+  const filtered = currentResults.filter(wh => {
+    if (selectedLocations.length > 0) {
+      const whArea = (wh['sub-location'] || wh.area || '').toLowerCase();
+      if (!selectedLocations.some(loc => whArea.includes(loc))) return false;
+    }
+
+    if (selectedCargoTypes.length > 0) {
+      const whCargo = (wh['cargo-type'] || wh.cargoType || '').toLowerCase();
+      if (!selectedCargoTypes.some(ct => whCargo.includes(ct))) return false;
+    }
+
+    if (selectedStorageTypes.length > 0) {
+      const whStorage = (wh['storage-type'] || wh.storageType || '').toLowerCase();
+      if (!selectedStorageTypes.some(st => whStorage.includes(st))) return false;
+    }
+
+    if (selectedTemperatures.length > 0) {
+      const whTemp = (wh.temperature || '').toLowerCase();
+      if (!selectedTemperatures.some(t => whTemp.includes(t))) return false;
+    }
+
+    if (selectedStarRatings.length > 0) {
+      const whRating = parseInt(wh['star-rating'] || wh.starRating || 0);
+      if (!selectedStarRatings.includes(whRating)) return false;
+    }
+
+    return true;
+  });
+
+  const sortBy = document.getElementById('cgz-sortBy').value;
+  filteredSorted = [...filtered];
+
+  if (sortBy === 'capacity-desc') {
+    filteredSorted.sort((a, b) => (parseFloat(b.capacity) || 0) - (parseFloat(a.capacity) || 0));
+  } else if (sortBy === 'capacity-asc') {
+    filteredSorted.sort((a, b) => (parseFloat(a.capacity) || 0) - (parseFloat(b.capacity) || 0));
+  } else if (sortBy === 'name-asc') {
+    filteredSorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  } else if (sortBy === 'name-desc') {
+    filteredSorted.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+  }
+
+  currentPage = 1;
+  renderPage();
+}
+
+// ── Pagination ──
+
+function renderPage() {
+  const totalPages = Math.ceil(filteredSorted.length / PAGE_SIZE);
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageItems = filteredSorted.slice(start, start + PAGE_SIZE);
+
+  renderWarehouses(pageItems);
+  renderPagination(totalPages);
+}
+
+function renderPagination(totalPages) {
+  const container = document.getElementById('cgz-paginationControls');
+  if (totalPages <= 1) {
+    container.innerHTML = '';
+    return;
+  }
+
+  let html = '';
+
+  html += `<button class="cgz-page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:14px;height:14px;">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+    </svg>
+    Prev
+  </button>`;
+
+  const maxVisible = 5;
+  let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+  let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+  if (endPage - startPage < maxVisible - 1) {
+    startPage = Math.max(1, endPage - maxVisible + 1);
+  }
+
+  if (startPage > 1) {
+    html += `<button class="cgz-page-btn" onclick="goToPage(1)">1</button>`;
+    if (startPage > 2) html += `<span class="cgz-page-ellipsis">...</span>`;
+  }
+
+  for (let p = startPage; p <= endPage; p++) {
+    html += `<button class="cgz-page-btn ${p === currentPage ? 'cgz-active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+  }
+
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) html += `<span class="cgz-page-ellipsis">...</span>`;
+    html += `<button class="cgz-page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+  }
+
+  html += `<button class="cgz-page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">
+    Next
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:14px;height:14px;">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+    </svg>
+  </button>`;
+
+  const rangeStart = (currentPage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(currentPage * PAGE_SIZE, filteredSorted.length);
+  html += `<div class="cgz-page-info">Showing ${rangeStart}\u2013${rangeEnd} of ${filteredSorted.length}</div>`;
+
+  container.innerHTML = html;
+}
+
+function goToPage(page) {
+  const totalPages = Math.ceil(filteredSorted.length / PAGE_SIZE);
+  if (page < 1 || page > totalPages) return;
+  currentPage = page;
+  renderPage();
+  document.getElementById('cgz-resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── View Details Helper ──
+
+/** Store current page warehouses for view-details redirect */
+let currentPageWarehouses = [];
+
+function viewDetails(index) {
+  const wh = currentPageWarehouses[index];
+  if (!wh) return;
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(wh)) {
+    if (value !== null && value !== undefined && value !== '') {
+      params.set(key, String(value));
+    }
+  }
+  window.location.href = 'indetail.php?' + params.toString();
+}
+
+// ── Warehouse Card Rendering ──
+
+function showEmpty(location) {
+  const list = document.getElementById('cgz-warehouseList');
+  list.innerHTML = `
+    <div class="cgz-empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+      </svg>
+      <p>No warehouses found in <strong>${location}</strong> matching your criteria.</p>
+    </div>`;
+}
+
+function renderWarehouses(warehouses) {
+  const list = document.getElementById('cgz-warehouseList');
+
+  if (warehouses.length === 0) {
+    const location = document.getElementById('cgz-location').value;
+    showEmpty(location);
+    document.getElementById('cgz-paginationControls').innerHTML = '';
+    return;
+  }
+
+  currentPageWarehouses = warehouses;
+
+  list.innerHTML = warehouses.map((wh, idx) => {
+    const capacity = parseFloat(wh.capacity) || 0;
+    const whUnit = wh.unit || 'Sqft';
+    const displayCap = capacity.toLocaleString();
+    const imageUrl = wh.imageUrl || wh['image-url'] || '';
+    const name = wh.name || wh.id;
+    const location = wh.location || '';
+    const area = wh.area || '';
+    const cargoType = wh.cargoType || '';
+    const whStorageType = wh.storageType || '';
+    const temperature = wh.temperature || '';
+    const starRating = parseInt(wh.starRating || 0);
+    const typeOfWarehouse = wh.typeOfWarehouse || '';
+    const safetyAndSecurity = wh.safetyAndSecurity || '';
+    const otherFacilities = wh.otherFacilities || '';
+    const rawRate = parseFloat(wh.rate);
+    const rate = (!isNaN(rawRate) && rawRate > 0) ? rawRate.toFixed(2) : '0.00';
+
+    const imageHtml = imageUrl
+      ? `<img src="${imageUrl}" alt="${name}" />`
+      : `<div class="cgz-no-image">
+           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.2" stroke="currentColor">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3H21m-3.75 3H21" />
+           </svg>
+         </div>`;
+
+    let starsHtml = '';
+    for (let i = 1; i <= 5; i++) {
+      const cls = i <= starRating ? 'cgz-star-icon' : 'cgz-star-icon cgz-empty';
+      starsHtml += `<svg class="${cls}" viewBox="0 0 20 20" fill="currentColor"><path d="${STAR_SVG_PATH}"/></svg>`;
+    }
+
+    const locationDisplay = area
+      ? `${area}, ${location.charAt(0).toUpperCase() + location.slice(1)}`
+      : location.toUpperCase();
+
+    return `
+      <div class="cgz-warehouse-card">
+        <div class="cgz-card-image">${imageHtml}</div>
+        <div class="cgz-card-body">
+          <div class="cgz-card-info">
+            <h3 style="display:inline-flex;align-items:center;gap:0.4rem;">${name} <span class="cgz-stars">${starsHtml}</span></h3>
+            <div class="cgz-card-location">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+              </svg>
+              ${locationDisplay}
+            </div>
+            <div class="cgz-card-tags">
+              ${cargoType ? `<span class="cgz-tag">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+                ${cargoType}
+              </span>` : ''}
+              ${typeOfWarehouse ? `<span class="cgz-tag">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+                </svg>
+                ${typeOfWarehouse}
+              </span>` : ''}
+              ${whStorageType ? `<span class="cgz-tag">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3H21m-3.75 3H21" />
+                </svg>
+                ${whStorageType}
+              </span>` : ''}
+              ${temperature ? `<span class="cgz-tag">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                </svg>
+                ${temperature}
+              </span>` : ''}
+              <span class="cgz-tag">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L12 12.75l-5.571-3m11.142 0 4.179 2.25L12 17.25l-9.75-5.25 4.179-2.25" />
+                </svg>
+                ${displayCap} ${whUnit}
+              </span>
+              ${safetyAndSecurity ? `<span class="cgz-tag">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                </svg>
+                ${safetyAndSecurity}
+              </span>` : ''}
+              ${otherFacilities ? `<span class="cgz-tag">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.049.58.025 1.194-.14 1.743" />
+                </svg>
+                ${otherFacilities}
+              </span>` : ''}
+            </div>
+          </div>
+          <div class="cgz-card-meta">
+            <div>
+              <div class="cgz-card-rate"><span>AED</span> <strong>${rate}</strong></div>
+              <div class="cgz-rate-label">per month + VAT</div>
+            </div>
+            <button class="cgz-view-details-btn" onclick="viewDetails(${idx})">
+              View details
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function applySortAndRender() {
+  applyFilters();
+}
+
+// ══════════════════════════════════════════
+// ── Initialisation (called from HTML) ──
+// ══════════════════════════════════════════
+
+/**
+ * Bootstrap the CargoZ warehouse search UI.
+ * Call this once from a <script type="module"> in index.html.
+ */
+export function init() {
+  // Populate the main location search dropdown
+  const locationSelect = document.getElementById('cgz-location');
+  locationSelect.innerHTML = MAIN_LOCATIONS.map(loc =>
+    `<option value="${loc.value}">${loc.label}</option>`
+  ).join('');
+
+  // Populate static filter sections
+  renderCheckboxFilter('cgz-filterCargoTypeBody',   'filterCargoType',   CARGO_TYPE_OPTIONS);
+  renderCheckboxFilter('cgz-filterStorageTypeBody', 'filterStorageType', STORAGE_TYPE_OPTIONS);
+  renderCheckboxFilter('cgz-filterTemperatureBody', 'filterTemperature', TEMPERATURE_OPTIONS);
+  renderStarRatingFilter('cgz-filterStarRatingBody');
+
+  // Expose functions to inline HTML handlers (onclick, onchange)
+  window.updateUnit = updateUnit;
+  window.toggleFilter = toggleFilter;
+  window.applyFilters = applyFilters;
+  window.resetFilters = resetFilters;
+  window.applySortAndRender = applySortAndRender;
+  window.goToPage = goToPage;
+  window.viewDetails = viewDetails;
+
+  // Search form submission
+  document.getElementById('cgz-warehouseSearchForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const location = document.getElementById('cgz-location').value;
+    const storageType = document.getElementById('cgz-storageType').value;
+    const areaValue = document.getElementById('cgz-areaValue').value;
+
+    if (storageType && !areaValue) {
+      alert('Please enter the required ' + (VALIDATION_LABELS[storageType] || 'value') + '.');
+      document.getElementById('cgz-areaValue').focus();
+      return;
+    }
+
+    const value = areaValue ? parseFloat(areaValue) : null;
+    currentStorageType = storageType || 'SQFT';
+
+    const locationLabel = document.getElementById('cgz-location').selectedOptions[0].text;
+    document.getElementById('cgz-resultsTitle').textContent = `${locationLabel}: Top picks for you`;
+
+    const searchBtn = document.getElementById('cgz-searchBtn');
+    searchBtn.classList.add('cgz-loading');
+    resetFilters();
+    updateLocationFilter(location);
+    showLoading();
+
+    try {
+      const warehouses = await searchByLocation(location);
+      currentResults = filterByCapacity(warehouses, currentStorageType, value);
+      applySortAndRender();
+    } catch (error) {
+      console.error('Search failed:', error);
+      document.getElementById('cgz-warehouseList').innerHTML = `
+        <div class="cgz-empty-state">
+          <p>Something went wrong. Please try again.</p>
+          <p style="font-size:0.75rem;color:#9ca3af;margin-top:0.5rem;">${error.message}</p>
+        </div>`;
+      document.getElementById('cgz-paginationControls').innerHTML = '';
+    } finally {
+      searchBtn.classList.remove('cgz-loading');
+    }
+  });
+
+  // Auto-search if ?location=... URL param is present
+  const urlParams = new URLSearchParams(window.location.search);
+  const locationParam = urlParams.get('location');
+  if (locationParam) {
+    // Check if the param matches a valid MAIN_LOCATIONS value (case-insensitive)
+    const match = MAIN_LOCATIONS.find(
+      loc => loc.value.toLowerCase() === locationParam.trim().toLowerCase()
+    );
+    if (match) {
+      locationSelect.value = match.value;
+      // Trigger the search programmatically
+      document.getElementById('cgz-warehouseSearchForm').dispatchEvent(new Event('submit'));
+    }
+  }
 }
