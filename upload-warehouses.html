@@ -9,8 +9,75 @@
     p { color: #9ca3af; line-height: 1.6; margin-bottom: 0.5rem; }
     code { background: #2d2d44; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
 
+    /* Field reference box */
+    .field-ref {
+      margin: 1.25rem 0;
+      padding: 1rem 1.25rem;
+      background: #2d2d44;
+      border-left: 4px solid #fbbf24;
+      border-radius: 8px;
+    }
+    .field-ref h3 {
+      color: #fbbf24;
+      margin: 0 0 0.6rem 0;
+      font-size: 0.95rem;
+    }
+    .field-ref ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.3rem 1.5rem;
+    }
+    .field-ref li {
+      font-size: 0.85rem;
+      color: #d1d5db;
+      padding: 0.15rem 0;
+    }
+    .field-ref li code {
+      color: #3ecfb1;
+      font-weight: 600;
+    }
+    .field-ref .note {
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: #f87171;
+      font-weight: 600;
+    }
+
+    /* Textarea */
+    .json-area {
+      width: 100%;
+      min-height: 260px;
+      margin-top: 0.75rem;
+      padding: 0.85rem;
+      background: #16162b;
+      color: #e0e0e0;
+      border: 1.5px solid #3a3a5c;
+      border-radius: 10px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    .json-area:focus {
+      border-color: #3ecfb1;
+    }
+    .json-area::placeholder {
+      color: #6b7280;
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
     .start-btn {
-      margin-top: 1.5rem;
       padding: 0.75rem 2.5rem;
       background: linear-gradient(135deg, #3ecfb1 0%, #38c5a7 100%);
       color: #fff;
@@ -31,23 +98,134 @@
       opacity: 0.6;
       cursor: not-allowed;
     }
+    .validate-btn {
+      padding: 0.75rem 2rem;
+      background: #2d2d44;
+      color: #d1d5db;
+      border: 1.5px solid #3a3a5c;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .validate-btn:hover {
+      background: #3a3a5c;
+      border-color: #4a4a6a;
+    }
 
+    /* Status */
     #uploadStatus {
       margin-top: 1rem;
       font-size: 0.95rem;
       font-weight: 500;
       min-height: 1.5rem;
     }
+
+    /* Sample toggle */
+    .sample-toggle {
+      margin-top: 0.75rem;
+      font-size: 0.82rem;
+      color: #3ecfb1;
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      padding: 0;
+    }
+    .sample-json {
+      display: none;
+      margin-top: 0.5rem;
+      padding: 0.75rem;
+      background: #16162b;
+      border: 1px solid #3a3a5c;
+      border-radius: 8px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: #9ca3af;
+      white-space: pre;
+      overflow-x: auto;
+    }
   </style>
 </head>
 <body>
   <h1>Upload Warehouses to Firestore</h1>
-  <p>Make sure you have pasted your warehouse JSON array into <code>WAREHOUSE_DATA</code> in <code>upload-warehouses.js</code>.</p>
-  <p>Open the <strong>browser console</strong> (F12 → Console) to see detailed upload logs.</p>
+  <p>Paste your warehouse JSON array in the text area below and click <strong>Start Upload</strong>.</p>
 
-  <button class="start-btn" id="startBtn" onclick="startUpload()">Start Upload</button>
+  <!-- Field reference -->
+  <div class="field-ref">
+    <h3>⚠ Firestore Field Names (case-sensitive)</h3>
+    <ul>
+      <li><code>name</code> — Warehouse ID</li>
+      <li><code>area</code> — Sub-location</li>
+      <li><code>location</code> — Main location</li>
+      <li><code>cargoType</code> — Cargo type</li>
+      <li><code>Type of Warehouse</code> — Warehouse type</li>
+      <li><code>storageType</code> — Storage type</li>
+      <li><code>capacity</code> — Capacity (number)</li>
+      <li><code>unit</code> — Unit (Sqft / Sqm / Pallet)</li>
+      <li><code>starGrading</code> — Star rating (number)</li>
+      <li><code>temperature</code> — Temperature control</li>
+      <li><code>safetyAndSecurity</code> — Safety info</li>
+      <li><code>otherFacilities</code> — Facilities</li>
+      <li><code>imageUrl</code> — Image path</li>
+      <li><code>rate</code> — Monthly rate (number)</li>
+    </ul>
+    <p class="note">⚠ Field names are case-sensitive. Use the exact keys listed above in your JSON.</p>
+  </div>
+
+  <!-- Sample JSON -->
+  <button class="sample-toggle" onclick="toggleSample()">Show sample JSON</button>
+  <pre class="sample-json" id="sampleJson">[
+  {
+    "name": "SWH-10101",
+    "area": "Al Quoz",
+    "location": "Dubai",
+    "cargoType": "General",
+    "Type of Warehouse": "General Cargo",
+    "storageType": "Bulk Space",
+    "capacity": 10000,
+    "unit": "Sqft",
+    "starGrading": 4.0,
+    "safetyAndSecurity": "CCTV / Fire Alarm / Smoke Detectors",
+    "temperature": "Non-Air Conditioned",
+    "otherFacilities": "Loading Bay, 2 Forklifts",
+    "imageUrl": "",
+    "rate": 0
+  }
+]</pre>
+
+  <!-- Textarea -->
+  <textarea
+    class="json-area"
+    id="jsonInput"
+    placeholder='Paste your JSON array here, e.g. [{ "name": "SWH-10101", ... }, { ... }]'
+    spellcheck="false"
+  ></textarea>
+
+  <!-- Buttons -->
+  <div class="btn-row">
+    <button class="validate-btn" onclick="validateJson()">Validate JSON</button>
+    <button class="start-btn" id="startBtn" onclick="startUpload()">Start Upload</button>
+  </div>
   <div id="uploadStatus"></div>
 
   <script type="module" src="./upload-warehouses.js"></script>
+  <script>
+    function toggleSample() {
+      const el = document.getElementById('sampleJson');
+      const btn = el.previousElementSibling;
+      if (el.style.display === 'block') {
+        el.style.display = 'none';
+        btn.textContent = 'Show sample JSON';
+      } else {
+        el.style.display = 'block';
+        btn.textContent = 'Hide sample JSON';
+      }
+    }
+  </script>
 </body>
 </html>
