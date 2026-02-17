@@ -533,6 +533,7 @@ body {
   font-weight: 600;
   color: #374151;
   transition: color 0.15s;
+  margin: 0 !important;
 }
 
 .cgz-filter-header:hover h4 {
